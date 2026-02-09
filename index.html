@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STORY WARS - GenLayer AI Battle Arena</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --neon-cyan: #00ffff;
+      --neon-magenta: #ff00ff;
+      --neon-yellow: #ffff00;
+      --dark-bg: #0a0a0a;
+      --dark-panel: #1a1a1a;
+      --text-primary: #ffffff;
+      --text-muted: #888888;
+      --border-color: #333333;
+      --success: #00ff00;
+      --danger: #ff0000;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--dark-bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(var(--border-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+      background-size: 50px 50px;
+      opacity: 0.3;
+      z-index: -1;
+      animation: gridMove 20s linear infinite;
+    }
+
+    @keyframes gridMove {
+      0% { background-position: 0 0; }
+      100% { background-position: 50px 50px; }
+    }
+
+    .neon {
+      text-shadow: 
+        0 0 5px currentColor,
+        0 0 10px currentColor,
+        0 0 20px currentColor,
+        0 0 40px currentColor;
+      animation: neonFlicker 3s ease-in-out infinite;
+    }
+
+    @keyframes neonFlicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      border: 4px solid var(--neon-cyan);
+      background: var(--dark-panel);
+      padding: 30px;
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, var(--neon-cyan), transparent);
+      animation: headerSweep 3s linear infinite;
+      opacity: 0.1;
+    }
+
+    @keyframes headerSweep {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    h1 {
+      font-family: 'Bungee', cursive;
+      font-size: 3.5rem;
+      color: var(--neon-cyan);
+      text-align: center;
+      letter-spacing: 5px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--neon-magenta);
+      font-size: 1rem;
+      margin-top: 10px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+
+    .wallet-section {
+      background: var(--dark-panel);
+      border: 2px solid var(--neon-yellow);
+      padding: 20px;
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .wallet-info {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .wallet-badge {
+      background: var(--neon-yellow);
+      color: var(--dark-bg);
+      padding: 10px 20px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    button {
+      background: var(--dark-panel);
+      border: 3px solid var(--neon-cyan);
+      color: var(--neon-cyan);
+      padding: 15px 30px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: var(--neon-cyan);
+      transform: translate(-50%, -50%);
+      transition: width 0.3s ease, height 0.3s ease;
+    }
+
+    button:hover::before {
+      width: 100%;
+      height: 100%;
+    }
+
+    button:hover {
+      color: var(--dark-bg);
+    }
+
+    button span {
+      position: relative;
+      z-index: 1;
+    }
+
+    button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .btn-danger {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .btn-danger::before {
+      background: var(--danger);
+    }
+
+    .btn-success {
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .btn-success::before {
+      background: var(--success);
+    }
+
+    .panel {
+      background: var(--dark-panel);
+      border: 3px solid var(--border-color);
+      padding: 25px;
+      position: relative;
+      margin-bottom: 30px;
+    }
+
+    .panel-header {
+      font-family: 'Bungee', cursive;
+      font-size: 1.5rem;
+      color: var(--neon-magenta);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border-color);
+      text-transform: uppercase;
+    }
+
+    .theme-display {
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+      padding: 30px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .theme-label {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--dark-bg);
+      margin-bottom: 10px;
+    }
+
+    .theme-text {
+      font-family: 'Bungee', cursive;
+      font-size: 2rem;
+      color: var(--dark-bg);
+    }
+
+    .prompt-display {
+      background: var(--dark-bg);
+      border: 3px solid var(--neon-yellow);
+      padding: 25px;
+      margin-bottom: 20px;
+      font-size: 1.2rem;
+      line-height: 1.8;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 300px;
+      background: var(--dark-bg);
+      border: 2px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      line-height: 1.8;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+    }
+
+    .word-count {
+      text-align: right;
+      color: var(--text-muted);
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+
+    .word-count.valid {
+      color: var(--success);
+    }
+
+    .word-count.invalid {
+      color: var(--danger);
+    }
+
+    .timer {
+      background: var(--dark-bg);
+      border: 3px solid var(--neon-magenta);
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .timer-value {
+      font-family: 'Bungee', cursive;
+      font-size: 3rem;
+      color: var(--neon-magenta);
+    }
+
+    .timer-label {
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+
+    .status-message {
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border: 2px solid;
+      animation: statusPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes statusPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .status-info {
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+      background: rgba(0, 255, 255, 0.1);
+    }
+
+    .status-success {
+      border-color: var(--success);
+      color: var(--success);
+      background: rgba(0, 255, 0, 0.1);
+    }
+
+    .status-error {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: rgba(255, 0, 0, 0.1);
+    }
+
+    .spinner {
+      display: none;
+      width: 60px;
+      height: 60px;
+      margin: 30px auto;
+      border: 4px solid var(--border-color);
+      border-top: 4px solid var(--neon-cyan);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .spinner.active {
+      display: block;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .result-card {
+      background: var(--dark-bg);
+      border: 3px solid var(--border-color);
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+
+    .score-display {
+      font-size: 3rem;
+      color: var(--neon-cyan);
+      text-align: center;
+      font-family: 'Bungee', cursive;
+      margin: 20px 0;
+    }
+
+    .xp-display {
+      text-align: center;
+      color: var(--neon-yellow);
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+
+    .difficulty-badge {
+      display: inline-block;
+      padding: 8px 20px;
+      margin-bottom: 15px;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+    }
+
+    .difficulty-beginner {
+      background: var(--success);
+      color: var(--dark-bg);
+    }
+
+    .difficulty-intermediate {
+      background: var(--neon-yellow);
+      color: var(--dark-bg);
+    }
+
+    .difficulty-expert {
+      background: var(--danger);
+      color: var(--text-primary);
+    }
+
+    .button-group {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      .button-group {
+        grid-template-columns: 1fr;
+      }
+
+      .theme-text {
+        font-size: 1.3rem;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--dark-bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--neon-cyan);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 class="neon">STORY WARS</h1>
+      <div class="subtitle neon">GenLayer AI Creative Battle Arena</div>
+    </header>
+
+    <div class="wallet-section">
+      <div class="wallet-info" id="walletInfo" style="display: none;">
+        <div class="wallet-badge" id="walletAddress">NOT CONNECTED</div>
+        <div style="color: var(--neon-yellow);" id="totalXP">Total XP: 0</div>
+      </div>
+      <button id="connectWallet"><span>CONNECT WALLET</span></button>
+    </div>
+
+    <div id="statusContainer"></div>
+
+    <div class="panel">
+      <div class="theme-display">
+        <div class="theme-label">CURRENT WEEKLY THEME</div>
+        <div class="theme-text" id="weeklyTheme">Loading...</div>
+      </div>
+
+      <div id="gameArea">
+        <!-- Welcome Screen -->
+        <div id="welcomeScreen">
+          <div style="text-align: center; padding: 40px 20px;">
+            <h2 style="color: var(--neon-magenta); margin-bottom: 20px; font-size: 2rem;">
+              READY TO BATTLE?
+            </h2>
+            <p style="color: var(--text-muted); line-height: 1.8; margin-bottom: 30px;">
+              Write a creative story based on an AI-generated prompt.
+              You have 8 minutes. The AI judges your creativity, coherence, and theme alignment.
+              Earn XP and challenge unfair judgments through community voting!
+            </p>
+
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; color: var(--neon-yellow); margin-bottom: 10px; text-transform: uppercase; font-weight: bold;">
+                SELECT DIFFICULTY
+              </label>
+              <select id="difficultySelect" style="width: 100%; padding: 15px; background: var(--dark-bg); border: 2px solid var(--border-color); color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 1rem;">
+                <option value="beginner">BEGINNER (1x XP)</option>
+                <option value="intermediate">INTERMEDIATE (1.5x XP)</option>
+                <option value="expert">EXPERT (2x XP)</option>
+              </select>
+            </div>
+
+            <button id="startGameBtn" class="btn-success" style="width: 100%; font-size: 1.2rem; padding: 20px;">
+              <span>START SOLO BATTLE</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Writing Screen -->
+        <div id="writingScreen" style="display: none;">
+          <div class="timer">
+            <div class="timer-value" id="timerValue">08:00</div>
+            <div class="timer-label">TIME REMAINING</div>
+          </div>
+          <div class="prompt-display" id="gamePrompt"></div>
+          <div>
+            <textarea id="storyInput" placeholder="Write your story here... (50-500 words)"></textarea>
+            <div class="word-count" id="wordCount">Words: 0 / 500</div>
+          </div>
+          <button id="submitStoryBtn" class="btn-success" style="width: 100%; margin-top: 20px;">
+            <span>SUBMIT STORY</span>
+          </button>
+        </div>
+
+        <!-- Judging Screen -->
+        <div id="judgingScreen" style="display: none;">
+          <div style="text-align: center; padding: 60px 20px;">
+            <h2 style="color: var(--neon-cyan); margin-bottom: 20px; font-size: 2.5rem;">
+              AI JUDGING IN PROGRESS
+            </h2>
+            <div class="spinner active"></div>
+            <p style="color: var(--text-muted); margin-top: 30px;">
+              Evaluating creativity, coherence, and theme alignment...
+            </p>
+          </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" style="display: none;">
+          <div class="result-card">
+            <div class="panel-header" style="border: none;">YOUR BATTLE RESULTS</div>
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+              <div class="difficulty-badge" id="resultDifficulty"></div>
+            </div>
+
+            <div class="score-display" id="finalScore">0 / 100</div>
+            <div class="xp-display" id="earnedXP">+0 XP</div>
+
+            <div style="background: var(--dark-bg); padding: 20px; border-radius: 5px; margin: 20px 0;">
+              <div style="color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; font-size: 0.9rem;">
+                YOUR STORY
+              </div>
+              <div id="submittedStory" style="line-height: 1.8; color: var(--text-primary);"></div>
+            </div>
+
+            <div class="button-group">
+              <button id="challengeBtn" class="btn-danger"><span>CHALLENGE</span></button>
+              <button id="newGameBtn" class="btn-success"><span>NEW GAME</span></button>
+              <button id="shareBtn" class="btn-success"><span>SHARE</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'genlayer-js';
+    import { studionet } from 'genlayer-js/chains';
+
+    let client;
+    let connectedAccount;
+    const CONTRACT = '0x9E016151f494a7105e8744405273Aa9737Fa8992';
+    
+    let currentPrompt = '';
+    let currentDifficulty = 'beginner';
+    let currentStory = '';
+    let currentScore = 0;
+    let gameTimer = null;
+    let totalXP = parseInt(localStorage.getItem('totalXP') || '0');
+
+    // Update XP display
+    function updateXPDisplay() {
+      document.getElementById('totalXP').textContent = `Total XP: ${totalXP}`;
+    }
+
+    // Connect Wallet
+    document.getElementById('connectWallet').addEventListener('click', async () => {
+      if (!window.ethereum) {
+        showStatus('Please install MetaMask!', 'error');
+        return;
+      }
+
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        connectedAccount = accounts[0];
+        
+        client = createClient({
+          chain: studionet,
+          account: connectedAccount
+        });
+
+        document.getElementById('walletInfo').style.display = 'flex';
+        document.getElementById('walletAddress').textContent = 
+          `${connectedAccount.substring(0, 6)}...${connectedAccount.substring(38)}`;
+        document.getElementById('connectWallet').style.display = 'none';
+        
+        updateXPDisplay();
+        showStatus('Wallet connected!', 'success');
+        await loadWeeklyTheme();
+      } catch (error) {
+        showStatus('Failed to connect: ' + error.message, 'error');
+      }
+    });
+
+    // Load Weekly Theme
+    async function loadWeeklyTheme() {
+      try {
+        const theme = await client.readContract({
+          address: CONTRACT,
+          functionName: 'get_weekly_theme'
+        });
+        document.getElementById('weeklyTheme').textContent = theme || 'LOADING...';
+      } catch (error) {
+        console.error('Failed to load theme:', error);
+        document.getElementById('weeklyTheme').textContent = 'Creative Writing Challenge';
+      }
+    }
+
+    // Start Game
+    document.getElementById('startGameBtn').addEventListener('click', async () => {
+      if (!client) {
+        showStatus('Please connect wallet first!', 'error');
+        return;
+      }
+
+      currentDifficulty = document.getElementById('difficultySelect').value;
+
+      try {
+        showStatus('Generating prompt...', 'info');
+        
+        const roomId = `solo_${Date.now()}`;
+        const prompt = await client.writeContract({
+          address: CONTRACT,
+          functionName: 'start_game',
+          args: [roomId]
+        });
+
+        currentPrompt = prompt;
+        showStatus('Prompt generated! Start writing!', 'success');
+        enterWritingPhase();
+      } catch (error) {
+        showStatus('Failed to start: ' + error.message, 'error');
+      }
+    });
+
+    // Enter Writing Phase
+    function enterWritingPhase() {
+      document.getElementById('welcomeScreen').style.display = 'none';
+      document.getElementById('writingScreen').style.display = 'block';
+      document.getElementById('gamePrompt').textContent = currentPrompt;
+
+      // 8-minute timer
+      let timeLeft = 480;
+      gameTimer = setInterval(() => {
+        timeLeft--;
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        document.getElementById('timerValue').textContent = 
+          `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+        if (timeLeft <= 0) {
+          clearInterval(gameTimer);
+          showStatus('Time\'s up! Submit now!', 'error');
+        }
+      }, 1000);
+    }
+
+    // Word Count
+    document.getElementById('storyInput').addEventListener('input', (e) => {
+      const words = e.target.value.trim().split(/\s+/).filter(w => w.length > 0).length;
+      const wordCountEl = document.getElementById('wordCount');
+      wordCountEl.textContent = `Words: ${words} / 500`;
+      
+      if (words >= 50 && words <= 500) {
+        wordCountEl.classList.add('valid');
+        wordCountEl.classList.remove('invalid');
+      } else {
+        wordCountEl.classList.remove('valid');
+        wordCountEl.classList.add('invalid');
+      }
+    });
+
+    // Submit Story
+    document.getElementById('submitStoryBtn').addEventListener('click', async () => {
+      const story = document.getElementById('storyInput').value.trim();
+      const words = story.split(/\s+/).filter(w => w.length > 0).length;
+
+      if (words < 50 || words > 500) {
+        showStatus('Story must be 50-500 words!', 'error');
+        return;
+      }
+
+      currentStory = story;
+      clearInterval(gameTimer);
+
+      document.getElementById('writingScreen').style.display = 'none';
+      document.getElementById('judgingScreen').style.display = 'block';
+
+      try {
+        showStatus('AI is judging your story...', 'info');
+        
+        const score = await client.writeContract({
+          address: CONTRACT,
+          functionName: 'judge_story',
+          args: [story, currentPrompt]
+        });
+
+        currentScore = parseInt(score);
+        
+        // Calculate XP
+        const xp = await client.readContract({
+          address: CONTRACT,
+          functionName: 'calculate_xp',
+          args: [currentScore, currentDifficulty]
+        });
+
+        totalXP += parseInt(xp);
+        localStorage.setItem('totalXP', totalXP.toString());
+        
+        showResults(currentScore, xp);
+      } catch (error) {
+        showStatus('Judging failed: ' + error.message, 'error');
+        document.getElementById('judgingScreen').style.display = 'none';
+        document.getElementById('writingScreen').style.display = 'block';
+      }
+    });
+
+    // Show Results
+    function showResults(score, xp) {
+      document.getElementById('judgingScreen').style.display = 'none';
+      document.getElementById('resultsScreen').style.display = 'block';
+
+      const difficultyBadge = document.getElementById('resultDifficulty');
+      difficultyBadge.textContent = currentDifficulty.toUpperCase();
+      difficultyBadge.className = `difficulty-badge difficulty-${currentDifficulty}`;
+
+      document.getElementById('finalScore').textContent = `${score} / 100`;
+      document.getElementById('earnedXP').textContent = `+${xp} XP`;
+      document.getElementById('submittedStory').textContent = currentStory;
+
+      updateXPDisplay();
+      showStatus('Results ready!', 'success');
+    }
+
+    // Challenge Judgment
+    document.getElementById('challengeBtn').addEventListener('click', async () => {
+      try {
+        showStatus('Submitting challenge...', 'info');
+        
+        const result = await client.writeContract({
+          address: CONTRACT,
+          functionName: 'challenge_judgment',
+          args: [currentStory, currentScore, currentPrompt]
+        });
+
+        if (result.includes('ACCEPTED')) {
+          showStatus('Challenge accepted! Score adjusted.', 'success');
+          // Extract new score and update
+          const match = result.match(/(\d+)/);
+          if (match) {
+            const newScore = parseInt(match[1]);
+            const scoreDiff = newScore - currentScore;
+            const xpDiff = Math.floor(scoreDiff * 0.5); // Rough estimate
+            
+            currentScore = newScore;
+            totalXP += xpDiff;
+            localStorage.setItem('totalXP', totalXP.toString());
+            
+            document.getElementById('finalScore').textContent = `${newScore} / 100`;
+            document.getElementById('earnedXP').textContent = `+${xpDiff} bonus XP`;
+            updateXPDisplay();
+          }
+        } else {
+          showStatus('Challenge rejected. Original score stands.', 'error');
+        }
+      } catch (error) {
+        showStatus('Challenge failed: ' + error.message, 'error');
+      }
+    });
+
+    // New Game
+    document.getElementById('newGameBtn').addEventListener('click', () => {
+      document.getElementById('resultsScreen').style.display = 'none';
+      document.getElementById('welcomeScreen').style.display = 'block';
+      document.getElementById('storyInput').value = '';
+      currentPrompt = '';
+      currentStory = '';
+      currentScore = 0;
+    });
+
+    // Share Results
+    document.getElementById('shareBtn').addEventListener('click', () => {
+      const shareText = `I just scored ${currentScore}/100 in Story Wars on GenLayer! Theme: ${document.getElementById('weeklyTheme').textContent}
+
+My story: "${currentStory.substring(0, 100)}..."
+
+Total XP: ${totalXP}
+
+Try it yourself!`;
+
+      if (navigator.share) {
+        navigator.share({
+          title: 'Story Wars Results',
+          text: shareText
+        });
+      } else {
+        navigator.clipboard.writeText(shareText);
+        showStatus('Results copied to clipboard!', 'success');
+      }
+    });
+
+    // Status Helper
+    function showStatus(message, type) {
+      const container = document.getElementById('statusContainer');
+      const statusDiv = document.createElement('div');
+      statusDiv.className = `status-message status-${type}`;
+      statusDiv.textContent = message;
+      
+      container.innerHTML = '';
+      container.appendChild(statusDiv);
+
+      setTimeout(() => {
+        statusDiv.remove();
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
